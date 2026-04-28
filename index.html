@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>A4横式四等分标签 · 生成Google Docs</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: #f2f5f9;
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+      padding: 2rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      max-width: 1100px;
+      width: 100%;
+      background: white;
+      border-radius: 28px;
+      box-shadow: 0 20px 35px rgba(0,0,0,0.05), 0 8px 18px rgba(0,20,40,0.08);
+      padding: 2rem 2rem 2.5rem;
+    }
+    h1 {
+      font-weight: 500;
+      font-size: 1.9rem;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.4rem;
+      letter-spacing: -0.3px;
+      border-bottom: 1px solid #e9eef3;
+      padding-bottom: 1.2rem;
+    }
+    h1 span {
+      background: #eef6ff;
+      color: #0b4f6c;
+      font-size: 1rem;
+      font-weight: 500;
+      padding: 0.2rem 1rem;
+      border-radius: 30px;
+      margin-left: 0.8rem;
+      letter-spacing: 0.2px;
+    }
+    .subtitle {
+      color: #475569;
+      margin-bottom: 1.8rem;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .grid-4 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.8rem;
+      margin: 1.5rem 0 1.8rem;
+    }
+    .card {
+      background: #f8fafd;
+      border: 1px solid #e2e8f0;
+      border-radius: 24px;
+      padding: 1.3rem 1.3rem 1.5rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+    }
+    .card:hover {
+      border-color: #b9cdff;
+      background: #ffffff;
+      box-shadow: 0 8px 18px rgba(0,67,128,0.06);
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1.2rem;
+      font-weight: 600;
+      color: #0f3b5c;
+      border-bottom: 1px dashed #cdd9e9;
+      padding-bottom: 0.65rem;
+    }
+    .card-header i {
+      font-style: normal;
+      font-size: 1.3rem;
+    }
+    .field {
+      margin-bottom: 0.9rem;
+      display: flex;
+      flex-direction: column;
+    }
+    .field label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      color: #4b5b6c;
+      margin-bottom: 0.2rem;
+    }
+    .field input {
+      padding: 0.6rem 0.8rem;
+      border: 1px solid #dce3eb;
+      border-radius: 14px;
+      font-size: 0.9rem;
+      background: white;
+      transition: 0.15s;
+      outline: none;
+      font-family: inherit;
+    }
+    .field input:focus {
+      border-color: #1e5b9c;
+      box-shadow: 0 0 0 3px rgba(30,91,156,0.15);
+    }
+    .row-dual {
+      display: flex;
+      gap: 0.7rem;
+    }
+    .row-dual .field {
+      flex: 1;
+    }
+    .optional-hint {
+      font-size: 0.7rem;
+      color: #5f6c80;
+      margin-left: 0.2rem;
+      font-weight: 400;
+      text-transform: none;
+    }
+    .preview-note {
+      background: #f0f4fe;
+      border-radius: 16px;
+      padding: 0.8rem 1.2rem;
+      font-size: 0.85rem;
+      color: #194866;
+      margin: 0.8rem 0 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    button {
+      background: #0b2b44;
+      border: none;
+      color: white;
+      font-weight: 600;
+      font-size: 1.1rem;
+      padding: 0.9rem 2.2rem;
+      border-radius: 40px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      background: linear-gradient(135deg, #173e5c, #0c2b40);
+      box-shadow: 0 8px 18px rgba(8,43,70,0.25);
+      transition: all 0.2s;
+      letter-spacing: 0.3px;
+      border: 1px solid #465e74;
+      margin-top: 0.6rem;
+    }
+    button:hover {
+      background: linear-gradient(135deg, #1d4b6e, #123451);
+      box-shadow: 0 10px 22px rgba(8,43,70,0.35);
+      transform: scale(1.01);
+    }
+    button:active {
+      transform: scale(0.98);
+    }
+    .layout-order {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 0.5rem;
+      color: #2c3e50;
+    }
+    .badge {
+      background: #e6edf6;
+      border-radius: 20px;
+      padding: 0.2rem 1rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    hr {
+      border: 0.5px solid #dee6ef;
+      margin: 1.5rem 0 0.8rem;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>
+    📄 A4 横式·四等分标签
+    <span>每格 = A6 narrow margin</span>
+  </h1>
+  <div class="subtitle">
+    ⬜ 生成的文档布局：<strong>┌ 1 ┐ ┌ 3 ┐</strong> (上排) 　 <strong>└ 2 ┘ └ 4 ┘</strong> (下排)
+  </div>
+
+  <!-- 4套资料输入区 -->
+  <div class="grid-4" id="inputsGrid">
+    <!-- 动态用js生成四个卡片 -->
+  </div>
+
+  <div class="preview-note">
+    💡 <strong>第三排格式：</strong> Item Name (Main) + 空格 + Item Name (Sub) 　•　 Sales Order 自动添加前缀「SO-」<br>
+    📌 例如：SO-007788-1　或　SO-007788A-1A　(第二个'-'后为Item No.)
+  </div>
+
+  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+    <div class="layout-order">
+      <span class="badge">📐 文档内格子排列</span>
+      <span style="font-weight:500;">第一行：格子1 ｜ 格子3</span>
+      <span style="font-weight:500;">第二行：格子2 ｜ 格子4</span>
+    </div>
+    <button id="generateDocBtn">
+      ⬇️ 生成 Google Docs (横式A4·四格)
+    </button>
+  </div>
+  <hr>
+  <div style="font-size:0.8rem; color:#556b82; margin-top:0.4rem;">
+    ✅ 每份资料独立填入，点击按钮下载 .gdoc 文件（实际为HTML格式，Google Docs可完美打开为A4横式）。
+  </div>
+</div>
+
+<script>
+  (function() {
+    // ----- 四套资料的默认占位示例 -----
+    const defaultData = [
+      { custShort: "FJKCGSS", so: "007788-1", itemNo: "1", qty: "10", mainName: "Table", subName: "with backplash" },
+      { custShort: "ABCORP", so: "007788A-1A", itemNo: "1A", qty: "5", mainName: "Chair", subName: "armrest" },
+      { custShort: "XYZLTD", so: "123456-2", itemNo: "2", qty: "20", mainName: "Desk", subName: "" },
+      { custShort: "QRSINC", so: "998877B-3C", itemNo: "3C", qty: "12", mainName: "Shelf", subName: "oak finish" }
+    ];
+
+    // 当前数据存储
+    let setsData = JSON.parse(JSON.stringify(defaultData));
+
+    // 获取容器
+    const gridContainer = document.getElementById('inputsGrid');
+
+    // 渲染四个卡片
+    function renderCards() {
+      if (!gridContainer) return;
+      gridContainer.innerHTML = '';
+      setsData.forEach((set, idx) => {
+        const setNumber = idx + 1;
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.dataset.setIndex = idx;
+
+        card.innerHTML = `
+          <div class="card-header">
+            <i>🏷️</i> 第${setNumber}套资料 (格子${setNumber})
+          </div>
+          <div class="field">
+            <label>📋 Customer Short Name</label>
+            <input type="text" id="cust_${idx}" value="${escapeHtml(set.custShort || '')}" placeholder="例如 FJKCGSS" autocomplete="off">
+          </div>
+          <div class="row-dual">
+            <div class="field">
+              <label>🔢 Sales Order No. <span style="font-weight:400;color:#4f6b7e;">(自动加SO-)</span></label>
+              <input type="text" id="so_${idx}" value="${escapeHtml(set.so || '')}" placeholder="007788-1 或 007788A-1A" autocomplete="off">
+            </div>
+            <div class="field">
+              <label>🔹 Item No.</label>
+              <input type="text" id="itemNo_${idx}" value="${escapeHtml(set.itemNo || '')}" placeholder="1 / 1A" autocomplete="off">
+            </div>
+          </div>
+          <div class="field">
+            <label>📦 Quantity</label>
+            <input type="text" id="qty_${idx}" value="${escapeHtml(set.qty || '')}" placeholder="10" autocomplete="off">
+          </div>
+          <div class="row-dual">
+            <div class="field">
+              <label>🏷️ Item Name (Main)</label>
+              <input type="text" id="mainName_${idx}" value="${escapeHtml(set.mainName || '')}" placeholder="Table" autocomplete="off">
+            </div>
+            <div class="field">
+              <label>🏷️ Item Name (Sub) <span class="optional-hint">- Optional</span></label>
+              <input type="text" id="subName_${idx}" value="${escapeHtml(set.subName || '')}" placeholder="with backplash" autocomplete="off">
+            </div>
+          </div>
+        `;
+        gridContainer.appendChild(card);
+      });
+
+      attachInputListeners();
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function attachInputListeners() {
+      for (let i = 0; i < 4; i++) {
+        const custEl = document.getElementById(`cust_${i}`);
+        const soEl = document.getElementById(`so_${i}`);
+        const itemNoEl = document.getElementById(`itemNo_${i}`);
+        const qtyEl = document.getElementById(`qty_${i}`);
+        const mainEl = document.getElementById(`mainName_${i}`);
+        const subEl = document.getElementById(`subName_${i}`);
+
+        const updateSet = () => {
+          if (setsData[i]) {
+            setsData[i].custShort = custEl?.value || '';
+            setsData[i].so = soEl?.value || '';
+            setsData[i].itemNo = itemNoEl?.value || '';
+            setsData[i].qty = qtyEl?.value || '';
+            setsData[i].mainName = mainEl?.value || '';
+            setsData[i].subName = subEl?.value || '';
+          }
+        };
+
+        [custEl, soEl, itemNoEl, qtyEl, mainEl, subEl].forEach(el => {
+          if (el) el.addEventListener('input', updateSet);
+        });
+      }
+    }
+
+    // ----- 构建文档HTML：生成的文件内部按 1 3 / 2 4 排列 -----
+    function buildDocHTML() {
+      // 准备四个格子的内容
+      const cells = [0, 1, 2, 3].map(i => {
+        const s = setsData[i] || {};
+        let rawSo = (s.so || '').trim();
+        if (rawSo.toUpperCase().startsWith('SO-')) {
+          rawSo = rawSo.substring(3);
+        }
+        const salesOrderFormatted = rawSo ? `SO-${rawSo}` : '';
+        const itemNo = (s.itemNo || '').trim();
+        
+        // 第一排：Sales Order No.   Item No.
+        const line1 = `${salesOrderFormatted}   ${itemNo}`;
+
+        // 第二排：Customer Short Name  Qty
+        const cust = (s.custShort || '').trim();
+        const qty = (s.qty || '').trim();
+        const line2 = `${cust} Qty: ${qty}`;
+
+        // 第三排：Item Name (Main) + 空格 + Item Name (Sub)
+        const main = (s.mainName || '').trim();
+        const sub = (s.subName || '').trim();
+        let line3 = main;
+        if (sub) {
+          line3 = `${main} ${sub}`;
+        }
+
+        return { line1, line2, line3 };
+      });
+
+      // 生成四个单元格HTML，按顺序：cells[0]格子1, cells[1]格子2, cells[2]格子3, cells[3]格子4
+      function makeCellHTML(cellData, label) {
+        return `
+          <div style="width: 49.5%; height: 49.5%; display: flex; align-items: center; justify-content: center; box-sizing: border-box; padding: 4px; margin: 0.15%;">
+            <div style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; font-family: 'Segoe UI', 'Roboto', Arial, sans-serif; font-size: 11px; line-height: 1.35; color: #1e1e1e; padding: 6px; word-break: break-word; border: 0.5px dashed #b0bcc9; border-radius: 4px; background: #ffffff;">
+              <div style="font-weight: 600; margin-bottom: 3px; font-size: 11.5px; letter-spacing: 0.2px;">${escapeHtml(cellData.line1) || '&nbsp;'}</div>
+              <div style="font-weight: 500; margin-bottom: 3px; font-size: 11px;">${escapeHtml(cellData.line2) || '&nbsp;'}</div>
+              <div style="font-weight: 500; font-size: 11px; white-space: pre-wrap;">${escapeHtml(cellData.line3) || '&nbsp;'}</div>
+            </div>
+          </div>
+        `;
+      }
+
+      // 关键：第一行是格子1和格子3，第二行是格子2和格子4
+      const row1cell1 = makeCellHTML(cells[0], '格子1'); // 格子1
+      const row1cell3 = makeCellHTML(cells[2], '格子3'); // 格子3
+      const row2cell2 = makeCellHTML(cells[1], '格子2'); // 格子2
+      const row2cell4 = makeCellHTML(cells[3], '格子4'); // 格子4
+
+      // 构建完整HTML：使用flex布局，第一行放1和3，第二行放2和4
+      const fullHtml = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A4 Landscape 4-up Labels</title>
+  <style>
+    @page {
+      size: A4 landscape;
+      margin: 6mm;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background: white;
+      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100vh;
+      box-sizing: border-box;
+    }
+    .page-container {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+    .row {
+      display: flex;
+      width: 100%;
+      height: 50%;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-container">
+    <!-- 第一行：格子1 (左) 和 格子3 (右) -->
+    <div class="row">
+      ${row1cell1}
+      ${row1cell3}
+    </div>
+    <!-- 第二行：格子2 (左) 和 格子4 (右) -->
+    <div class="row">
+      ${row2cell2}
+      ${row2cell4}
+    </div>
+  </div>
+</body>
+</html>`;
+
+      return fullHtml;
+    }
+
+    // 下载 .gdoc 文件
+    function downloadGDoc() {
+      const htmlContent = buildDocHTML();
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      const timestamp = new Date().toISOString().slice(0,19).replace(/:/g, '-');
+      link.download = `A4_4up_Labels_${timestamp}.gdoc`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    // 绑定生成按钮
+    function setupButton() {
+      const btn = document.getElementById('generateDocBtn');
+      if (btn) {
+        btn.addEventListener('click', (e) => {
+          // 同步数据
+          for (let i = 0; i < 4; i++) {
+            const custEl = document.getElementById(`cust_${i}`);
+            const soEl = document.getElementById(`so_${i}`);
+            const itemNoEl = document.getElementById(`itemNo_${i}`);
+            const qtyEl = document.getElementById(`qty_${i}`);
+            const mainEl = document.getElementById(`mainName_${i}`);
+            const subEl = document.getElementById(`subName_${i}`);
+            if (setsData[i]) {
+              setsData[i].custShort = custEl?.value || '';
+              setsData[i].so = soEl?.value || '';
+              setsData[i].itemNo = itemNoEl?.value || '';
+              setsData[i].qty = qtyEl?.value || '';
+              setsData[i].mainName = mainEl?.value || '';
+              setsData[i].subName = subEl?.value || '';
+            }
+          }
+          downloadGDoc();
+        });
+      }
+    }
+
+    // 初始化
+    renderCards();
+    setupButton();
+  })();
+</script>
+</body>
+</html>
